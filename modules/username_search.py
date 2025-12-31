@@ -1,135 +1,124 @@
-import requests
+import asyncio,aiohttp,itertools,hashlib,time,socket
 
-SITES={
-"GitHub":"https://github.com/{}",
-"GitLab":"https://gitlab.com/{}",
-"Bitbucket":"https://bitbucket.org/{}",
-"SourceForge":"https://sourceforge.net/u/{}/profile",
-"CodePen":"https://codepen.io/{}",
-"Replit":"https://replit.com/@{}",
-"HackerOne":"https://hackerone.com/{}",
-"Bugcrowd":"https://bugcrowd.com/{}",
-"ExploitDB":"https://www.exploit-db.com/?author={}",
-"Keybase":"https://keybase.io/{}",
-"Pastebin":"https://pastebin.com/u/{}",
-"Giters":"https://giters.com/{}",
-"GreasyFork":"https://greasyfork.org/en/users/{}",
-"OpenBugBounty":"https://www.openbugbounty.org/researcher/{}",
-"DevTo":"https://dev.to/{}",
-"Medium":"https://medium.com/@{}",
-"Reddit":"https://www.reddit.com/user/{}",
-"RedditOld":"https://old.reddit.com/user/{}",
-"HackerNews":"https://news.ycombinator.com/user?id={}",
-"StackOverflow":"https://stackoverflow.com/users/story/{}",
-"StackExchange":"https://stackexchange.com/users/{}",
-"SuperUser":"https://superuser.com/users/{}",
-"ServerFault":"https://serverfault.com/users/{}",
-"AskUbuntu":"https://askubuntu.com/users/{}",
-"Twitter":"https://twitter.com/{}",
-"X":"https://x.com/{}",
-"Instagram":"https://instagram.com/{}",
-"Facebook":"https://facebook.com/{}",
-"TikTok":"https://tiktok.com/@{}",
-"Snapchat":"https://www.snapchat.com/add/{}",
-"Telegram":"https://t.me/{}",
-"TelegramUser":"https://t.me/s/{}",
-"Discord":"https://discord.com/users/{}",
-"Steam":"https://steamcommunity.com/id/{}",
-"SteamRep":"https://steamrep.com/search?q={}",
-"EpicGames":"https://www.epicgames.com/id/{}",
-"BattleNet":"https://battle.net/account/management/{}",
-"Roblox":"https://www.roblox.com/user.aspx?username={}",
-"Minecraft":"https://namemc.com/profile/{}",
-"Hypixel":"https://hypixel.net/members/{}",
-"RuneScape":"https://secure.runescape.com/m=hiscore_oldschool/hiscorepersonal?user1={}",
-"Chess":"https://www.chess.com/member/{}",
-"Lichess":"https://lichess.org/@/{}",
-"TryHackMe":"https://tryhackme.com/p/{}",
-"HackTheBox":"https://app.hackthebox.com/users/{}",
-"RootMe":"https://www.root-me.org/{}",
-"OverTheWire":"https://overthewire.org/wargames/{}",
-"CTFtime":"https://ctftime.org/user/{}",
-"PentesterLab":"https://pentesterlab.com/profile/{}",
-"BugcrowdForum":"https://forum.bugcrowd.com/u/{}",
-"0x00sec":"https://0x00sec.org/u/{}",
-"Nulled":"https://www.nulled.to/user/{}",
-"Cracked":"https://cracked.io/{}",
-"LeakForums":"https://leakforums.is/user/{}",
-"RaidForums":"https://raidforums.com/User-{}",
-"HackForums":"https://hackforums.net/member.php?action=profile&uid={}",
-"Breached":"https://breached.vc/User-{}",
-"Sinister":"https://sinister.ly/User-{}",
-"XSS":"https://xss.is/user/{}",
-"BlackHatWorld":"https://www.blackhatworld.com/members/{}.{}",
-"LOLZ":"https://lolz.guru/members/{}",
-"Antichat":"https://antichat.ru/members/{}",
-"Cryptohack":"https://cryptohack.org/user/{}",
-"CryptoCompare":"https://www.cryptocompare.com/members/{}",
-"BitcoinTalk":"https://bitcointalk.org/index.php?action=profile;u={}",
-"Ethereum":"https://etherscan.io/address/{}",
-"OpenSea":"https://opensea.io/{}",
-"Gitcoin":"https://gitcoin.co/{}",
-"IPFS":"https://gateway.ipfs.io/ipfs/{}",
-"Keyoxide":"https://keyoxide.org/{}",
-"Mastodon":"https://mastodon.social/@{}",
-"Gab":"https://gab.com/{}",
-"TruthSocial":"https://truthsocial.com/@{}",
-"VK":"https://vk.com/{}",
-"OK":"https://ok.ru/{}",
-"Douban":"https://www.douban.com/people/{}",
-"Weibo":"https://weibo.com/{}",
-"Bilibili":"https://space.bilibili.com/{}",
-"SoundCloud":"https://soundcloud.com/{}",
-"Spotify":"https://open.spotify.com/user/{}",
-"Bandcamp":"https://bandcamp.com/{}",
-"LastFM":"https://www.last.fm/user/{}",
-"DeviantArt":"https://www.deviantart.com/{}",
-"ArtStation":"https://www.artstation.com/{}",
-"Behance":"https://www.behance.net/{}",
-"Dribbble":"https://dribbble.com/{}",
-"Flickr":"https://www.flickr.com/people/{}",
-"500px":"https://500px.com/{}",
-"Imgur":"https://imgur.com/user/{}",
-"Unsplash":"https://unsplash.com/@{}",
-"Pexels":"https://www.pexels.com/@{}",
-"AboutMe":"https://about.me/{}",
-"Gravatar":"https://en.gravatar.com/{}",
-"AngelList":"https://angel.co/{}",
-"Crunchbase":"https://www.crunchbase.com/person/{}",
-"ProductHunt":"https://www.producthunt.com/@{}",
-"IndieHackers":"https://www.indiehackers.com/{}",
-"Kaggle":"https://www.kaggle.com/{}",
-"LeetCode":"https://leetcode.com/{}",
-"HackerRank":"https://www.hackerrank.com/{}",
-"Codeforces":"https://codeforces.com/profile/{}",
-"AtCoder":"https://atcoder.jp/users/{}",
-"TopCoder":"https://www.topcoder.com/members/{}",
-"OpenSeaTest":"https://testnets.opensea.io/{}",
-"PyPI":"https://pypi.org/user/{}",
-"NPM":"https://www.npmjs.com/~{}",
-"RubyGems":"https://rubygems.org/profiles/{}",
-"Packagist":"https://packagist.org/users/{}",
-"CPAN":"https://metacpan.org/author/{}",
-"DockerHub":"https://hub.docker.com/u/{}",
-"Quora":"https://www.quora.com/profile/{}",
-"Slideshare":"https://www.slideshare.net/{}",
-"Scribd":"https://www.scribd.com/{}",
-"Academia":"https://independent.academia.edu/{}",
-"ResearchGate":"https://www.researchgate.net/profile/{}",
-"ORCID":"https://orcid.org/{}",
-"BuyMeACoffee":"https://www.buymeacoffee.com/{}",
-"Patreon":"https://www.patreon.com/{}",
-"KoFi":"https://ko-fi.com/{}"
+PLATFORMS={
+"GitHub":(["https://github.com/{}"],3),
+"GitLab":(["https://gitlab.com/{}"],3),
+"Bitbucket":(["https://bitbucket.org/{}"],3),
+"Twitter":(["https://twitter.com/{}","https://x.com/{}"],2),
+"Instagram":(["https://instagram.com/{}"],2),
+"Facebook":(["https://facebook.com/{}"],1),
+"Reddit":(["https://reddit.com/user/{}","https://old.reddit.com/user/{}"],2),
+"Telegram":(["https://t.me/{}","https://t.me/s/{}"],3),
+"TikTok":(["https://tiktok.com/@{}"],2),
+"Snapchat":(["https://snapchat.com/add/{}"],1),
+"Steam":(["https://steamcommunity.com/id/{}"],2),
+"SoundCloud":(["https://soundcloud.com/{}"],2),
+"Spotify":(["https://open.spotify.com/user/{}"],2),
+"DeviantArt":(["https://deviantart.com/{}"],2),
+"Imgur":(["https://imgur.com/user/{}"],2),
+"Kaggle":(["https://kaggle.com/{}"],3),
+"LeetCode":(["https://leetcode.com/{}"],3),
+"HackerRank":(["https://hackerrank.com/{}"],3),
+"DockerHub":(["https://hub.docker.com/u/{}"],3),
+"PyPI":(["https://pypi.org/user/{}"],3),
+"NPM":(["https://www.npmjs.com/~{}"],3),
+"Medium":(["https://medium.com/@{}"],2),
+"Mastodon":(["https://mastodon.social/@{}"],2),
+"VK":(["https://vk.com/{}"],2),
+"Pinterest":(["https://pinterest.com/{}"],1),
+"Tumblr":(["https://{}.tumblr.com"],2),
+"Linktree":(["https://linktr.ee/{}"],2),
+"Carrd":(["https://{}.carrd.co"],2),
+"TryHackMe":(["https://tryhackme.com/p/{}"],4),
+"HackTheBox":(["https://app.hackthebox.com/users/{}"],4),
+"RootMe":(["https://www.root-me.org/{}"],4),
+"CTFtime":(["https://ctftime.org/user/{}"],4),
+"HackerOne":(["https://hackerone.com/{}"],4),
+"Bugcrowd":(["https://bugcrowd.com/{}"],4),
+"ExploitDB":(["https://www.exploit-db.com/?author={}"],4),
+"Pastebin":(["https://pastebin.com/u/{}"],4),
+"Keybase":(["https://keybase.io/{}"],4),
+"0x00sec":(["https://0x00sec.org/u/{}"],5),
+"HackForums":(["https://hackforums.net/member.php?action=profile&uid={}"],5),
+"Nulled":(["https://nulled.to/user/{}"],5),
+"Cracked":(["https://cracked.io/{}"],5),
+"Breached":(["https://breached.vc/User-{}"],5),
+"XSS":(["https://xss.is/user/{}"],5),
+"BlackHatWorld":(["https://www.blackhatworld.com/members/{}.{}"],5),
+"LOLZ":(["https://lolz.guru/members/{}"],5),
+"Antichat":(["https://antichat.ru/members/{}"],5),
+"Doxbin":(["https://doxbin.org/user/{}","https://doxbin.com/user/{}"],5),
+"GreySec":(["https://greysec.net/members/{}"],5),
+"OpenBugBounty":(["https://www.openbugbounty.org/researchers/{}"],4),
+"HackThisSite":(["https://www.hackthissite.org/user/view/{}"],4),
+"PacketStorm":(["https://packetstormsecurity.com/user/{}"],4),
+"DefconForums":(["https://forum.defcon.org/member.php?action=profile&uid={}"],4),
+"ExploitIN":(["https://exploit.in/members/{}"],5),
+"Underc0de":(["https://underc0de.org/foro/index.php?action=profile;u={}"],5)
 }
 
-def find_socials(u,p=None):
-    r={}
-    px={"http":p,"https":p} if p else None
-    for k,v in SITES.items():
+VARIANTS=["{}","@{}","{}.html","{}/","u/{}","user/{}","users/{}","profile/{}","member/{}"]
+CACHE={}
+TTL=3600
+
+def _tor_available():
+    try:
+        s=socket.create_connection(("127.0.0.1",9050),2)
+        s.close()
+        return True
+    except:
+        return False
+
+def _mutations(u):
+    subs={"a":"4","e":"3","i":"1","o":"0","s":"5","t":"7"}
+    out={u,u.lower()}
+    for k,v in subs.items():
+        out.add(u.replace(k,v))
+        out.add(u.replace(k,v).lower())
+    for i in range(30):
+        out.add(f"{u}{i}")
+        out.add(f"{u}_{i}")
+    return out
+
+def _expand():
+    urls=[]
+    for bases,_ in PLATFORMS.values():
+        for b,v in itertools.product(bases,VARIANTS):
+            urls.append(b.replace("{}",v))
+    return urls
+
+ALL_URLS=_expand()
+
+async def _check(session,sem,url):
+    async with sem:
         try:
-            x=requests.get(v.format(u),timeout=5,proxies=px,allow_redirects=True)
-            if x.status_code in (200,301,302):
-                r[k]=v.format(u)
+            async with session.get(url,allow_redirects=True) as r:
+                if r.status in (200,301,302) and "login" not in str(r.url):
+                    return url
         except:
-            pass
-    return r
+            return None
+
+async def _runner(username,use_tor):
+    key=hashlib.sha1((username+str(use_tor)).encode()).hexdigest()
+    if key in CACHE and time.time()-CACHE[key]["t"]<TTL:
+        return CACHE[key]["d"]
+    found={}
+    sem=asyncio.Semaphore(70 if use_tor else 140)
+    proxy="socks5h://127.0.0.1:9050" if use_tor and _tor_available() else None
+    conn=aiohttp.TCPConnector(limit=70 if use_tor else 140,ssl=False)
+    async with aiohttp.ClientSession(connector=conn) as s:
+        tasks=[]
+        for m in _mutations(username):
+            for u in ALL_URLS:
+                tasks.append(_check(s,sem,u.format(m)))
+        for r in await asyncio.gather(*tasks):
+            if r:
+                dom=r.split("/")[2]
+                for name,(bases,w) in PLATFORMS.items():
+                    if any(b.split("/")[2] in dom for b in bases):
+                        found.setdefault(name,{"weight":w,"urls":[]})["urls"].append(r)
+    CACHE[key]={"t":time.time(),"d":found}
+    return found
+
+def find_socials(username,tor=False):
+    return asyncio.run(_runner(username,tor))
